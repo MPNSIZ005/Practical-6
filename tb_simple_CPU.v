@@ -55,6 +55,9 @@ module tb_simple_CPU;
         //In the instruction this is:    (instr)                (X2)         (X1)
         instruction = 20'b10111000000011110000;
         repeat(7) #1 clk=!clk;
+
+        instruction = 20'b10111000000011110000;
+        repeat(7) #1 clk=!clk;
         
         
     end
