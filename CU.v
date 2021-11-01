@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, sel3,w_r);
+module CU (clk, rst, instr, result2, operand1, operand2, offset, opcode, sel1, sel3,w_r,oreg0, oreg1, oreg2, oreg3);
     //Defaults unless overwritten during instantiation
     parameter DATA_WIDTH = 8; //8 bit wide data
     parameter ADDR_BITS = 5; //32 Addresses
@@ -16,6 +16,12 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
     output reg [DATA_WIDTH-1:0] offset;
     output reg [3:0] opcode;
     output reg sel1, sel3, w_r;
+  	//creating wire to display the regfile as a EP waveform 
+  	output reg [DATA_WIDTH-1:0] oreg0;
+  	output reg [DATA_WIDTH-1:0] oreg1;
+  	output reg [DATA_WIDTH-1:0] oreg2;
+  	output reg [DATA_WIDTH-1:0] oreg3;
+  	
 
     //REGISTER FILE: CU internal register file of 4 registers.  This is a over simplication of a real solution
     reg [DATA_WIDTH-1:0] regfile [0:3];
@@ -55,7 +61,13 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
                 sel1 <= 0;
                 sel3 <= 0;
                 w_r <= 0;
-                //-----------------------------
+                //----------------------------------------
+				//copying the regfile to an output regfile
+              	//----------------------------------------
+              	oreg0 <=  regfile[0];
+  				oreg1 <=  regfile[1];
+ 				oreg2 <=  regfile[2];
+  				oreg3 <=  regfile[3];
             end
 
             DECODE : begin //#1
@@ -65,9 +77,15 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
                     operand2 <= regfile[instruction[13:12]]; //X3
                     offset <= instruction[11:4];
                     opcode <= instruction[3:0];
-                   sel1 <= 1;
+                    sel1 <= 1;
                     sel3 <= 0;
                     w_r <= 0;
+          		 //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
                 end else if (instruction[19:18] == 2'b10) begin //loadR 
                     operand1 <= regfile[instruction[15:14]]; //X2
                     operand2 <= regfile[instruction[17:16]]; //z
@@ -76,19 +94,29 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
                     sel1 <= 0; //pass data_out
                     sel3 <= 1; //pass offset
                     w_r <= 0;
-                end else if (instruction[19:18] == 2'b11) begin //storeR 
-
-                    operand1 <= regfile[instruction[15:14]]; //X2
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+					oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
+                end else if (instruction[19:18] == 2'b11) begin //storeR 	
+                 	operand1 <= regfile[instruction[15:14]]; //X2
                     operand2 <= regfile[instruction[17:16]]; //z
                     offset <= instruction[11:4];
                     opcode <= instruction[3:0];
                     sel1 <= 0; //pass data_out
-                    sel3 <= 1; //pass offset
-                    w_r <= 1; // write
-                
-
+                    sel3 <= 0; //pass offset
+                    w_r <= 1;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
                 end
             end
+          
             EXECUTE: begin //#2
                 state = MEM_ACCESS; //#3
                 if (instruction[19:18] == 2'b01) begin //std_op
@@ -100,6 +128,12 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
                     sel1 <= 1;
                     sel3 <= 0;
                     w_r <= 0;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
 
                 end else if (instruction[19:18] == 2'b10) begin //loadR  
                     operand1 <= regfile[instruction[15:14]]; //X2
@@ -109,12 +143,26 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
                     sel1 <= 0; //pass data_out
                     sel3 <= 1; //pass offset
                     w_r <= 0;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
                 end else if (instruction[19:18] == 2'b11) begin //storeR
-                   /******************************************** 
-                   *
-                   * FILL IN CORRECT CODE HERE
-                   *
-                   ********************************************/ 
+                    operand1 <= regfile[instruction[15:14]]; //X2
+                    operand2 <= regfile[instruction[17:16]]; //z
+                    offset <= instruction[11:4];
+                    opcode <= instruction[3:0];
+                    sel1 <= 0; //pass Result1
+                  sel3 <= 1; //pass offset(changed to 1)
+                    w_r <= 1;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
                 end
             end
             MEM_ACCESS: begin //#3
@@ -127,14 +175,27 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
                     sel1 <= 0; //pass data_out
                     sel3 <= 1; //pass offset
                     w_r <= 0;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
                 end else if (instruction[19:18] == 2'b11) begin //storeR 
-                   /******************************************** 
-                   *
-                   * FILL IN CORRECT CODE HERE
-                   * Take note of what the next state should be according to
-                   * the FSM
-                   *
-                   ********************************************/ 
+                    operand1 <= regfile[instruction[15:14]]; //X2
+                    operand2 <= regfile[instruction[17:16]]; //z
+                    offset <= instruction[11:4];
+                    opcode <= instruction[3:0];
+                    sel1 <= 0; //pass Result1
+                  sel3 <= 1; //pass offset(changed to 1)
+                    w_r <= 0;// from 1;
+                    state = DECODE;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
                 end
             end
             WRITE_BACK: begin //#4
@@ -149,14 +210,29 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
                     sel1 <= 1;
                     sel3 <= 0;
                     w_r <= 0;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
                 end else if (instruction[19:18] == 2'b11) begin //storeR 
-                   /******************************************** 
-                   *
-                   * FILL IN CORRECT CODE HERE
-                   *
-                   ********************************************/ 
+                    operand1 <= regfile[instruction[15:14]]; //X2
+                    operand2 <= regfile[instruction[17:16]]; //z
+                    offset <= instruction[11:4];
+                    opcode <= instruction[3:0];
+                    sel1 <= 0; //pass Result1
+                    sel3 <= 0; //pass offset
+                    w_r <= 1;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
+                  	
                     
-                end else if (instruction[19:18] == 2'b10) begin //loadR             
+                end else if (instruction[19:18] == 2'b10) begin //loadR          
                     regfile[instruction[17:16]] <= result2; //From data mem
                     operand1 <= regfile[instruction[15:14]]; //X2
                     operand2 <= regfile[instruction[17:16]]; //z
@@ -165,6 +241,12 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
                     sel1 <= 0; //pass data_out
                     sel3 <= 1; //pass offset
                     w_r <= 0;
+                   //---------------------------------------					//copying the regfile to an output regfile
+              	//----------------------------------------
+                  	oreg0 <=  regfile[0];
+  					oreg1 <=  regfile[1];
+ 				 	oreg2 <=  regfile[2];
+  					oreg3 <=  regfile[3];
                 end
             end
 
@@ -172,4 +254,6 @@ module CU (clk,rst, instr, result2, operand1, operand2, offset, opcode, sel1, se
             state = RESET; //#0
         endcase
     end
+  
+  	
 endmodule
